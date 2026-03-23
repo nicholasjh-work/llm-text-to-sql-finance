@@ -1,0 +1,30 @@
+roles:
+  fpa_analyst:
+    schemas:
+      - finance_reporting
+    views:
+      - v_revenue
+      - v_opex
+      - v_margin_by_division
+
+  controller:
+    schemas:
+      - finance_reporting
+      - finance_detail
+    views:
+      - v_revenue
+      - v_opex
+      - v_margin_by_division
+      - v_journal_entries
+      - v_trial_balance
+
+  cfo:
+    schemas:
+      - finance_reporting
+      - finance_detail
+    views:
+      - v_revenue
+      - v_opex
+      - v_margin_by_division
+      - v_journal_entries
+      - v_trial_balance

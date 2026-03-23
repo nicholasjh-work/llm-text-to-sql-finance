@@ -1,0 +1,6 @@
+kpi_name,display_name,sql_expression,grain,source_view
+gross_margin,Gross Margin,"(SUM(revenue) - SUM(cogs)) / NULLIF(SUM(revenue), 0)","division, month",v_revenue
+net_revenue,Net Revenue,SUM(revenue),"division, month",v_revenue
+opex_variance,OPEX Variance,SUM(actual_opex) - SUM(budget_opex),"cost_center, month",v_opex
+opex_variance_pct,OPEX Variance %,"(SUM(actual_opex) - SUM(budget_opex)) / NULLIF(SUM(budget_opex), 0)","cost_center, month",v_opex
+revenue_per_unit,Revenue per Unit,"SUM(revenue) / NULLIF(SUM(units_sold), 0)","division, product_line, month",v_revenue

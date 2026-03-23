@@ -1,0 +1,33 @@
+safety_rules:
+  select_only: true
+  block_ddl: true
+  block_dml: true
+  block_select_star: true
+  require_where_on_fact_tables: true
+  max_query_length: 2000
+  statement_timeout_seconds: 30
+  max_result_rows: 10000
+
+blocked_keywords:
+  - DROP
+  - DELETE
+  - TRUNCATE
+  - ALTER
+  - CREATE
+  - INSERT
+  - UPDATE
+  - GRANT
+  - REVOKE
+  - EXEC
+  - EXECUTE
+  - MERGE
+  - CALL
+  - COPY
+  - UNLOAD
+  - PUT
+
+blocked_schema_access:
+  - INFORMATION_SCHEMA
+  - ACCOUNT_USAGE
+  - pg_catalog
+  - pg_stat

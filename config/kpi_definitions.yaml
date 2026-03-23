@@ -1,0 +1,35 @@
+kpis:
+  gross_margin:
+    display_name: Gross Margin
+    sql: "(SUM(revenue) - SUM(cogs)) / NULLIF(SUM(revenue), 0)"
+    grain: "division, month"
+    source_view: v_revenue
+    description: "Gross margin percentage: (revenue - COGS) / revenue"
+
+  net_revenue:
+    display_name: Net Revenue
+    sql: "SUM(revenue)"
+    grain: "division, month"
+    source_view: v_revenue
+    description: "Total net revenue after returns and adjustments"
+
+  opex_variance:
+    display_name: OPEX Variance
+    sql: "SUM(actual_opex) - SUM(budget_opex)"
+    grain: "cost_center, month"
+    source_view: v_opex
+    description: "Actual minus budgeted OPEX. Positive means over budget."
+
+  opex_variance_pct:
+    display_name: OPEX Variance %
+    sql: "(SUM(actual_opex) - SUM(budget_opex)) / NULLIF(SUM(budget_opex), 0)"
+    grain: "cost_center, month"
+    source_view: v_opex
+    description: "OPEX variance as percentage of budget"
+
+  revenue_per_unit:
+    display_name: Revenue per Unit
+    sql: "SUM(revenue) / NULLIF(SUM(units_sold), 0)"
+    grain: "division, product_line, month"
+    source_view: v_revenue
+    description: "Average revenue per unit sold"
