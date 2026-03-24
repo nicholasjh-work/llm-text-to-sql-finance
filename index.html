@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governed Text-to-SQL for Finance Teams</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8f9fa;--card:#fff;--border:#e2e8f0;--text:#1a202c;--muted:#64748b;--blue:#2563eb;--green:#16a34a;--amber:#d97706;--red:#dc2626;--teal:#0d9488;--purple:#7c3aed;--code-bg:#1e293b}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);padding:20px;max-width:1400px;margin:0 auto}
+h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:12px}
+.section-title{font-size:16px;font-weight:600;margin:24px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--blue)}
+.query-box{background:var(--card);border:2px solid var(--blue);border-radius:10px;padding:20px;margin-bottom:24px}
+.query-input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:12px;font-family:inherit}
+.query-input:focus{outline:none;border-color:var(--blue)}
+.btn{padding:8px 20px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.sql-output{background:var(--code-bg);color:#e2e8f0;padding:16px;border-radius:8px;font-family:'SF Mono',Consolas,monospace;font-size:12px;line-height:1.6;overflow-x:auto;margin:12px 0;white-space:pre}
+.sql-keyword{color:#93c5fd}
+.sql-string{color:#86efac}
+.sql-comment{color:#64748b}
+.result-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.result-table th{text-align:left;padding:6px 8px;background:#f1f5f9;border:1px solid var(--border);font-weight:600;font-size:11px;color:var(--muted)}
+.result-table td{padding:6px 8px;border:1px solid var(--border)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-amber{background:#fef3c7;color:#92400e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-purple{background:#ede9fe;color:#5b21b6}
+.confidence{display:flex;align-items:center;gap:8px;margin:8px 0}
+.conf-bar{height:8px;border-radius:4px;background:#e2e8f0;flex:1;max-width:200px}
+.conf-fill{height:100%;border-radius:4px;background:var(--green)}
+.role-card{padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.role-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.schema-list{font-size:12px;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:8px 10px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.arch-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:16px 0;font-size:12px}
+.arch-box{background:#f1f5f9;border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-weight:600;font-size:12px}
+.arch-box.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.arch-arrow{color:var(--muted);font-size:16px}
+.stat-num{font-size:24px;font-weight:700;color:var(--blue)}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{text-align:center;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:8px}
+@media(max-width:900px){.grid-2,.grid-3,.stats-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>Governed Text-to-SQL for Finance Teams</h1>
+<p class="subtitle">Natural-language to SQL with schema awareness, role-based access control, KPI glossary, and audit logging. Python, Flask, Snowflake, LLM API.</p>
+
+<div class="arch-flow">
+<div class="arch-box">User Question</div>
+<div class="arch-arrow">&#x2192;</div>
+<div class="arch-box active">Auth / RBAC</div>
+<div class="arch-arrow">&#x2192;</div>
+<div class="arch-box active">Schema Resolver</div>
+<div class="arch-arrow">&#x2192;</div>
+<div class="arch-box active">SQL Generator</div>
+<div class="arch-arrow">&#x2192;</div>
+<div class="arch-box active">Safety Validator</div>
+<div class="arch-arrow">&#x2192;</div>
+<div class="arch-box active">Snowflake</div>
+<div class="arch-arrow">&#x2192;</div>
+<div class="arch-box">Results + Audit</div>
+</div>
+
+<div class="stats-row">
+<div class="stat-card"><div class="stat-num">75%</div><div class="stat-label">Query error reduction</div></div>
+<div class="stat-card"><div class="stat-num">20+</div><div class="stat-label">Analyst hours freed/week</div></div>
+<div class="stat-card"><div class="stat-num">3-5 days</div><div class="stat-label">Reduced to seconds</div></div>
+<div class="stat-card"><div class="stat-num">32</div><div class="stat-label">Passing tests</div></div>
+</div>
+
+<div class="section-title">Try a Query</div>
+<div class="query-box">
+<input class="query-input" id="queryInput" type="text" value="Show me gross margin by division for Q3 2024" placeholder="Ask a finance question...">
+<div class="btn-row">
+<button class="btn btn-blue" onclick="runQuery()">Generate SQL</button>
+<button class="btn btn-outline" onclick="setQuery('What is net revenue by product line year to date')">Net Revenue YTD</button>
+<button class="btn btn-outline" onclick="setQuery('Show me OPEX variance by cost center for January 2024')">OPEX Variance</button>
+<button class="btn btn-outline" onclick="setQuery('Drop the revenue table')">Test Safety</button>
+</div>
+</div>
+
+<div id="queryResult" style="display:none">
+<div class="grid-2">
+<div class="card">
+<div class="card-title">Generated SQL</div>
+<div class="confidence"><span style="font-size:12px">Confidence:</span><div class="conf-bar"><div class="conf-fill" id="confBar" style="width:92%"></div></div><span style="font-size:13px;font-weight:600" id="confLabel">0.92</span></div>
+<div class="sql-output" id="sqlOutput"></div>
+<div id="validationStatus"></div>
+</div>
+<div class="card">
+<div class="card-title">Query Results</div>
+<div id="resultData"></div>
+</div>
+</div>
+</div>
+
+<div id="safetyBlock" style="display:none">
+<div class="card" style="border:2px solid var(--red);margin-bottom:24px">
+<div class="card-title" style="color:var(--red)">Query Blocked by Safety Validator</div>
+<div id="safetyMessage" style="font-size:14px;margin:12px 0"></div>
+<div id="safetyDetail" style="font-size:12px;color:var(--muted)"></div>
+</div>
+</div>
+
+<div class="section-title">Role-Based Access Control</div>
+<div class="grid-3">
+<div class="card">
+<div class="role-card" style="border-color:var(--blue)">
+<div class="role-header"><strong>FP&A Analyst</strong><span class="badge badge-blue">Standard</span></div>
+<div class="schema-list">Schemas: finance_reporting<br>Views: v_revenue, v_opex, v_margin_by_division</div>
+</div>
+</div>
+<div class="card">
+<div class="role-card" style="border-color:var(--purple)">
+<div class="role-header"><strong>Controller</strong><span class="badge badge-purple">Elevated</span></div>
+<div class="schema-list">Schemas: finance_reporting, finance_detail<br>Views: + v_journal_entries, v_trial_balance</div>
+</div>
+</div>
+<div class="card">
+<div class="role-card" style="border-color:var(--amber)">
+<div class="role-header"><strong>CFO</strong><span class="badge badge-amber">Full</span></div>
+<div class="schema-list">Schemas: finance_reporting, finance_detail<br>Views: all views, no filter restrictions</div>
+</div>
+</div>
+</div>
+
+<div class="section-title">KPI Glossary (Governed Definitions)</div>
+<div class="card">
+<table>
+<thead><tr><th>KPI</th><th>SQL Definition</th><th>Grain</th><th>Source View</th></tr></thead>
+<tbody>
+<tr><td><strong>Gross Margin</strong></td><td><code>(SUM(revenue) - SUM(cogs)) / NULLIF(SUM(revenue), 0)</code></td><td>division, month</td><td>v_revenue</td></tr>
+<tr><td><strong>Net Revenue</strong></td><td><code>SUM(revenue)</code></td><td>division, month</td><td>v_revenue</td></tr>
+<tr><td><strong>OPEX Variance</strong></td><td><code>SUM(actual_opex) - SUM(budget_opex)</code></td><td>cost_center, month</td><td>v_opex</td></tr>
+<tr><td><strong>OPEX Variance %</strong></td><td><code>(actual - budget) / NULLIF(budget, 0)</code></td><td>cost_center, month</td><td>v_opex</td></tr>
+<tr><td><strong>Revenue per Unit</strong></td><td><code>SUM(revenue) / NULLIF(SUM(units_sold), 0)</code></td><td>division, product, month</td><td>v_revenue</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section-title">Safety Rules (6 validation checks)</div>
+<div class="card">
+<table>
+<thead><tr><th>Rule</th><th>What it blocks</th><th>Tests</th></tr></thead>
+<tbody>
+<tr><td>SELECT only</td><td>Any non-SELECT statement (DROP, DELETE, INSERT, UPDATE)</td><td><span class="badge badge-green">4 passing</span></td></tr>
+<tr><td>Blocked keywords</td><td>DDL/DML keywords even inside SELECT statements</td><td><span class="badge badge-green">2 passing</span></td></tr>
+<tr><td>Table authorization</td><td>Queries referencing tables outside the user's authorized schema</td><td><span class="badge badge-green">2 passing</span></td></tr>
+<tr><td>No SELECT *</td><td>Wildcard selects (must name columns explicitly)</td><td><span class="badge badge-green">2 passing</span></td></tr>
+<tr><td>Fact table WHERE</td><td>Queries on large fact tables without a WHERE clause</td><td><span class="badge badge-green">2 passing</span></td></tr>
+<tr><td>Injection patterns</td><td>Multi-statement, SQL comments, INFORMATION_SCHEMA access</td><td><span class="badge badge-green">3 passing</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section-title">Audit Trail (last 5 queries)</div>
+<div class="card">
+<table>
+<thead><tr><th>Timestamp</th><th>User</th><th>Role</th><th>Question</th><th>Status</th></tr></thead>
+<tbody id="auditTable">
+<tr><td>2024-03-15 09:14:22</td><td>jsmith</td><td>fpa_analyst</td><td>Gross margin by division Q3</td><td><span class="badge badge-green">Success</span></td></tr>
+<tr><td>2024-03-15 09:12:05</td><td>mchen</td><td>controller</td><td>Journal entries for account 5100</td><td><span class="badge badge-green">Success</span></td></tr>
+<tr><td>2024-03-15 09:08:41</td><td>test_user</td><td>fpa_analyst</td><td>SELECT * FROM secret_salaries</td><td><span class="badge badge-red">Blocked</span></td></tr>
+<tr><td>2024-03-15 08:55:19</td><td>jsmith</td><td>fpa_analyst</td><td>Net revenue by product line YTD</td><td><span class="badge badge-green">Success</span></td></tr>
+<tr><td>2024-03-15 08:42:33</td><td>cfo_user</td><td>cfo</td><td>OPEX variance all cost centers</td><td><span class="badge badge-green">Success</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<p style="margin-top:24px;font-size:11px;color:var(--muted)">Interactive demo with simulated responses. Source: github.com/nicholasjh-work/llm-text-to-sql-finance</p>
+
+<script>
+const QUERIES = {
+    "Show me gross margin by division for Q3 2024": {
+        sql: `<span class="sql-keyword">SELECT</span>\n    r.division,\n    <span class="sql-keyword">SUM</span>(r.revenue) <span class="sql-keyword">AS</span> total_revenue,\n    <span class="sql-keyword">SUM</span>(r.cogs) <span class="sql-keyword">AS</span> total_cogs,\n    (<span class="sql-keyword">SUM</span>(r.revenue) - <span class="sql-keyword">SUM</span>(r.cogs))\n      / <span class="sql-keyword">NULLIF</span>(<span class="sql-keyword">SUM</span>(r.revenue), 0) <span class="sql-keyword">AS</span> gross_margin_pct\n<span class="sql-keyword">FROM</span> v_revenue r\n<span class="sql-keyword">WHERE</span> r.month <span class="sql-keyword">BETWEEN</span> <span class="sql-string">'2024-07-01'</span> <span class="sql-keyword">AND</span> <span class="sql-string">'2024-09-30'</span>\n<span class="sql-keyword">GROUP BY</span> r.division\n<span class="sql-keyword">ORDER BY</span> gross_margin_pct <span class="sql-keyword">DESC</span>`,
+        confidence: 0.95,
+        kpi: "Gross Margin",
+        results: [
+            ["North America","$12.4M","$7.5M","39.5%"],
+            ["EMEA","$8.1M","$5.1M","37.0%"],
+            ["APAC","$4.8M","$3.2M","33.3%"],
+            ["LATAM","$1.9M","$1.3M","31.6%"],
+        ],
+        cols: ["Division","Revenue","COGS","Gross Margin %"]
+    },
+    "What is net revenue by product line year to date": {
+        sql: `<span class="sql-keyword">SELECT</span>\n    r.product_line,\n    <span class="sql-keyword">SUM</span>(r.revenue) <span class="sql-keyword">AS</span> net_revenue_ytd\n<span class="sql-keyword">FROM</span> v_revenue r\n<span class="sql-keyword">WHERE</span> r.month >= <span class="sql-string">'2024-07-01'</span>\n<span class="sql-keyword">GROUP BY</span> r.product_line\n<span class="sql-keyword">ORDER BY</span> net_revenue_ytd <span class="sql-keyword">DESC</span>`,
+        confidence: 0.92,
+        kpi: "Net Revenue",
+        results: [
+            ["Enterprise Software","$18.2M"],
+            ["Professional Services","$12.7M"],
+            ["Cloud Platform","$9.8M"],
+            ["Support & Maintenance","$7.5M"],
+        ],
+        cols: ["Product Line","Net Revenue YTD"]
+    },
+    "Show me OPEX variance by cost center for January 2024": {
+        sql: `<span class="sql-keyword">SELECT</span>\n    o.cost_center,\n    <span class="sql-keyword">SUM</span>(o.actual_opex) <span class="sql-keyword">AS</span> actual,\n    <span class="sql-keyword">SUM</span>(o.budget_opex) <span class="sql-keyword">AS</span> budget,\n    <span class="sql-keyword">SUM</span>(o.actual_opex) - <span class="sql-keyword">SUM</span>(o.budget_opex) <span class="sql-keyword">AS</span> variance\n<span class="sql-keyword">FROM</span> v_opex o\n<span class="sql-keyword">WHERE</span> o.month = <span class="sql-string">'2024-01-01'</span>\n<span class="sql-keyword">GROUP BY</span> o.cost_center\n<span class="sql-keyword">ORDER BY</span> variance <span class="sql-keyword">DESC</span>`,
+        confidence: 0.91,
+        kpi: "OPEX Variance",
+        results: [
+            ["Engineering","$312K","$285K","+$27K"],
+            ["Marketing","$184K","$170K","+$14K"],
+            ["Sales - East","$245K","$240K","+$5K"],
+            ["Manufacturing","$410K","$425K","-$15K"],
+        ],
+        cols: ["Cost Center","Actual","Budget","Variance"]
+    },
+    "Drop the revenue table": {
+        blocked: true,
+        rule: "select_only",
+        reason: "Only SELECT statements are allowed. This query attempted a DROP operation.",
+        detail: "The safety validator rejected this query before it reached Snowflake. DDL statements (CREATE, ALTER, DROP) and DML statements (INSERT, UPDATE, DELETE) are blocked regardless of user role."
+    }
+};
+
+function setQuery(q) {
+    document.getElementById('queryInput').value = q;
+    runQuery();
+}
+
+function runQuery() {
+    const q = document.getElementById('queryInput').value;
+    const match = QUERIES[q];
+
+    document.getElementById('queryResult').style.display = 'none';
+    document.getElementById('safetyBlock').style.display = 'none';
+
+    if (!match) {
+        // Default response for unknown queries
+        document.getElementById('queryResult').style.display = 'block';
+        document.getElementById('sqlOutput').innerHTML = '<span class="sql-comment">-- Query would be generated by the LLM based on\n-- schema context and KPI glossary.\n-- This demo supports 4 pre-built examples.\n-- Click the buttons above to try them.</span>';
+        document.getElementById('confBar').style.width = '0%';
+        document.getElementById('confLabel').textContent = '-';
+        document.getElementById('validationStatus').innerHTML = '';
+        document.getElementById('resultData').innerHTML = '<p style="color:var(--muted);font-size:13px">Select a pre-built example to see results.</p>';
+        return;
+    }
+
+    if (match.blocked) {
+        document.getElementById('safetyBlock').style.display = 'block';
+        document.getElementById('safetyMessage').innerHTML = `<span class="badge badge-red">BLOCKED</span> Rule: <strong>${match.rule}</strong>`;
+        document.getElementById('safetyDetail').textContent = match.reason + ' ' + match.detail;
+
+        // Add to audit
+        const tbody = document.getElementById('auditTable');
+        const now = new Date().toISOString().slice(0,19).replace('T',' ');
+        tbody.innerHTML = `<tr><td>${now}</td><td>demo_user</td><td>fpa_analyst</td><td>${q}</td><td><span class="badge badge-red">Blocked</span></td></tr>` + tbody.innerHTML;
+        return;
+    }
+
+    document.getElementById('queryResult').style.display = 'block';
+    document.getElementById('sqlOutput').innerHTML = match.sql;
+    document.getElementById('confBar').style.width = (match.confidence * 100) + '%';
+    document.getElementById('confLabel').textContent = match.confidence.toFixed(2);
+    document.getElementById('validationStatus').innerHTML = `<div style="margin-top:8px"><span class="badge badge-green">Validation passed</span> <span class="badge badge-blue">KPI: ${match.kpi}</span></div>`;
+
+    let html = '<table class="result-table"><thead><tr>' + match.cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+    match.results.forEach(row => {
+        html += '<tr>' + row.map(v => `<td>${v}</td>`).join('') + '</tr>';
+    });
+    html += '</tbody></table>';
+    html += `<p style="font-size:11px;color:var(--muted);margin-top:8px">${match.results.length} rows returned</p>`;
+    document.getElementById('resultData').innerHTML = html;
+
+    // Add to audit
+    const tbody = document.getElementById('auditTable');
+    const now = new Date().toISOString().slice(0,19).replace('T',' ');
+    tbody.innerHTML = `<tr><td>${now}</td><td>demo_user</td><td>fpa_analyst</td><td>${q.substring(0,40)}</td><td><span class="badge badge-green">Success</span></td></tr>` + tbody.innerHTML;
+}
+</script>
+</body>
+</html>
