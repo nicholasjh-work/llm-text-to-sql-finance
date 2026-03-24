@@ -1,5 +1,7 @@
 # Governed Text-to-SQL for Finance Teams
 
+**[Live Demo](https://nicholasjh-work.github.io/llm-text-to-sql-finance/)**
+
 A natural-language interface that converts finance questions into SQL queries with schema awareness, role-based access control, and audit logging. Built for FP&A teams who depended on analysts for ad-hoc queries, creating 3-5 day delays and inconsistent reporting.
 
 Cut ad-hoc reporting turnaround from days to seconds, freed 20+ analyst hours weekly, and reduced manual query errors by 75%.
